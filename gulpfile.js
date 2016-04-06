@@ -18,6 +18,8 @@ var autoprefixer = require('gulp-autoprefixer');
 var gls = require('gulp-live-server');
 var nodemon = require('gulp-nodemon');
 var notify = require('gulp-notify');
+var argv = require('yargs').argv;
+var gulpif = require('gulp-if');
 
 var inputBase = './assets/';
 var outputBase = './public/';
@@ -52,38 +54,13 @@ var FILES = {
 gulp.task('clean:css', function() { return del([DIRS.out.css + '/**/*']); });
 gulp.task('clean:js', function()  { return del([DIRS.out.js + '/**/*']); });
 gulp.task('clean:img', function() { return del([DIRS.out.img + '/**/*']); });
+gulp.task('clean:assets', function() { return del([DIRS.in.root + FILES.assets]); });
 
 gulp.task('copy:img', function() {
     gulp.src(DIRS.in.img + '/**/*').pipe(gulp.dest(DIRS.out.img));
 });
 
-// var b = watchify(browserify({
-//     entries: [DIRS.in.js + '/' + FILES.in.js],
-//     debug: true,
-//     cache: {},
-//     packageCache: {},
-// }));
-//
-// b.on('update', bundle); // on any dep update, runs the bundler
-// b.on('log', gutil.log); // output build logs to terminal
-//
-// gulp.task('js', ['clean:js'], bundle);
-//
-// function bundle() {
-//     return b.bundle()
-//         .on('error', gutil.log.bind(gutil, 'Browserify Error'))
-//         .pipe(source(FILES.out.js))
-//         .pipe(buffer())
-//         .pipe(sourcemaps.init({
-//             loadMaps: true
-//         }))
-//         // .pipe(uglify()) // this is super slow
-//         .pipe(sourcemaps.write('./'))
-//         .pipe(gulp.dest(DIRS.out.js));
-//         // .pipe(livereload());
-// }
-
-gulp.task('js', ['clean:js'], function() {
+gulp.task('js', ['clean:assets', 'clean:js'], function() {
     var b = browserify({
         entries: [DIRS.in.js + '/' + FILES.in.js],
         debug: true
@@ -92,19 +69,17 @@ gulp.task('js', ['clean:js'], function() {
     return b.bundle()
         .pipe(source(FILES.out.js))
         .pipe(buffer())
-        .pipe(sourcemaps.init({
-            loadMaps: true
-        }))
-        // .pipe(uglify()) // lol slow
+        .pipe(gulpif(!argv.production, sourcemaps.init({loadMaps: true})))
+        .pipe(gulpif(argv.production, uglify())) // super slow!
         .on('error', gutil.log)
-        .pipe(sourcemaps.write('./'))
+        .pipe(sourcemaps.write())
         .pipe(gulp.dest(DIRS.out.js))
         .pipe(livereload());
 });
 
-gulp.task('sass', ['clean:css', 'clean:img', 'copy:img'], function() {
+gulp.task('sass', ['clean:assets', 'clean:css', 'clean:img', 'copy:img'], function() {
     return gulp.src(DIRS.in.css + '/' + FILES.in.css)
-        .pipe(sourcemaps.init())
+        .pipe(gulpif(!argv.production, sourcemaps.init()))
         .pipe(sass({
             outputStyle: 'compressed'
         }).on('error', sass.logError))
@@ -146,24 +121,14 @@ gulp.task('server', ['watch'], function() {
     });
 });
 
-gulp.task('default', ['server']);
+
+gulp.task('default', ['clean:assets', 'dev', 'server']);
 
 gulp.task('build', ['sass', 'js', 'rev']);
 gulp.task('dev', ['sass', 'js']);
 
 gulp.task('watch', function() {
     livereload.listen();
-
     gulp.watch(DIRS.in.css + '/**/*.scss', ['sass']);
     gulp.watch(DIRS.in.js + '/**/*.js', ['js']);
-    // gulp.watch(DIRS.in.root + FILES.assets, ['server']);
 });
-
-// gulp.task('lol', ['build'], function () {
-//     var stream = nodemon({
-//         script: 'server.js',
-//         watch: DIRS.in.root + FILES.assets,
-//         tasks: ['build']
-//     });
-//     return stream;
-// });
