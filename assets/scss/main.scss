@@ -4,6 +4,8 @@ $color: green;
 body {
     color: $color;
     background-image: url('../img/test.png');
+    background-repeat: no-repeat;
+    background-position: bottom right;
 }
 
 .foo {

@@ -4,6 +4,6 @@ var moment = require('./libs/moment');
 
 darkTower.gunslinger();
 
-$('body').css('padding', '50px');
+$('body').css('padding', '20px');
 
 console.log('foo');
