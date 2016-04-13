@@ -26,6 +26,7 @@
     "gulp-prompt": "^0.2.0",
     "gulp-replace": "^0.5.4",
     "gulp-rev": "^7.0.0",
+    "gulp-rev-css-url": "^0.1.0",
     "gulp-rev-delete-original": "^0.1.0",
     "gulp-sass": "^2.2.0",
     "gulp-sourcemaps": "^1.6.0",
