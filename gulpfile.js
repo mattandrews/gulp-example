@@ -23,6 +23,7 @@ var concat       = require('gulp-concat');
 var mocha        = require('gulp-mocha');
 var jshint       = require('gulp-jshint');
 var stylish      = require('jshint-stylish');
+var addSrc       = require('gulp-add-src');
 
 // can be removed after project is initially created
 var prompt       = require('gulp-prompt');
@@ -93,13 +94,24 @@ gulp.task('js', ['clean:assets', 'clean:js'], function() {
         .pipe(livereload());
 });
 
-// compile requirejs (currently not working, needs require/almond)
+// todo – make paths less shit
 gulp.task('requirejs', ['clean:assets', 'clean:js'], function () {
-    return gulp.src(DIRS.in.js + '/require/' + FILES.in.js)
-    .pipe(amdOptimize("main"))
-    .pipe(concat(FILES.out.js))
-    .pipe(gulp.dest(DIRS.out.js))
-    .pipe(livereload());
+    return gulp.src(DIRS.in.js + '/libs/echo/**/*.js')
+        .pipe(amdOptimize("echo"))
+        .pipe(addSrc.prepend('./assets/js/libs/echo/almond.js'))
+        .pipe(addSrc.append('./assets/js/libs/echo/_start.js'))
+        .pipe(concat('analytics.js'))
+        .pipe(uglify()) // super slow!
+        .pipe(gulp.dest(DIRS.in.js))
+        .pipe(livereload());
+});
+
+gulp.task('jsbundle', ['js'], function () {
+    return gulp.src([
+        DIRS.in.js + '/analytics.js',
+        DIRS.out.js + '/' + FILES.out.js
+    ]).pipe(concat('bundle.js'))
+    .pipe(gulp.dest(DIRS.out.js));
 });
 
 // compile Sass (after cleaning and moving images)
@@ -198,14 +210,14 @@ gulp.task('setup', function () {
 gulp.task('default', ['clean:assets', 'dev', 'server']);
 
 // used on LIVE (add --production flag to uglify files)
-gulp.task('build', ['sass', 'js', 'rev']);
+gulp.task('build', ['sass', 'jsbundle', 'rev']);
 
 // used for local dev testing (doesn't version files)
-gulp.task('dev', ['sass', 'js']);
+gulp.task('dev', ['sass', 'jsbundle']);
 
 // watch static files for changes and recompile
 gulp.task('watch', function() {
     livereload.listen();
     gulp.watch(DIRS.in.css + '/**/*.scss', ['sass']);
-    gulp.watch(DIRS.in.js + '/**/*.js', ['js']);
+    gulp.watch(DIRS.in.js + '/**/*.js', ['jsbundle']);
 });
