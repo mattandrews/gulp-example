@@ -1,26 +1,31 @@
 /* jshint node: true */
 'use strict';
 
-var browserify = require('browserify');
-var gulp = require('gulp');
-var source = require('vinyl-source-stream');
-var buffer = require('vinyl-buffer');
-var uglify = require('gulp-uglify');
-var sourcemaps = require('gulp-sourcemaps');
-var gutil = require('gulp-util');
-var sass = require('gulp-sass');
-var del = require('del');
-var livereload = require('gulp-livereload');
-var rev = require('gulp-rev');
-var revcssurls = require('gulp-rev-css-url');
-var revdel = require('gulp-rev-delete-original');
+var browserify   = require('browserify');
+var gulp         = require('gulp');
+var source       = require('vinyl-source-stream');
+var buffer       = require('vinyl-buffer');
+var uglify       = require('gulp-uglify');
+var sourcemaps   = require('gulp-sourcemaps');
+var gutil        = require('gulp-util');
+var sass         = require('gulp-sass');
+var del          = require('del');
+var livereload   = require('gulp-livereload');
+var rev          = require('gulp-rev');
+var revcssurls   = require('gulp-rev-css-url');
+var revdel       = require('gulp-rev-delete-original');
 var autoprefixer = require('gulp-autoprefixer');
-var nodemon = require('gulp-nodemon');
-var argv = require('yargs').argv;
-var gulpif = require('gulp-if');
+var nodemon      = require('gulp-nodemon');
+var argv         = require('yargs').argv;
+var gulpif       = require('gulp-if');
+var amdOptimize  = require('amd-optimize');
+var concat       = require('gulp-concat');
+var mocha        = require('gulp-mocha');
+var jshint       = require('gulp-jshint');
+var stylish      = require('jshint-stylish');
 
 // define main directories
-var inputBase = './assets/';
+var inputBase  = './assets/';
 var outputBase = './public/';
 
 // outline where static files live (or end up)
@@ -111,6 +116,27 @@ gulp.task('rev', ['sass', 'js'], function() {
         .pipe(gulp.dest(DIRS.out.root))
         .pipe(rev.manifest(FILES.assets))
         .pipe(gulp.dest(DIRS.in.root));
+});
+
+// run mocha tests
+gulp.task('mocha', function () {
+    return gulp.src('./test/**/*.js', {
+        read: false
+    }).pipe(mocha({
+        reporter: 'spec',
+        require: 'env-test'
+    }));
+});
+
+// run jshint
+gulp.task('lint', function() {
+    return gulp.src([
+        DIRS.in.js + '/**/*.js',
+        '!' + DIRS.in.js + '/libs/',
+        '!' + DIRS.in.js + '/libs/**',
+    ])
+    .pipe(jshint({}))
+    .pipe(jshint.reporter(stylish));
 });
 
 // a dev server which reloads express when server-side JS changes
