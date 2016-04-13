@@ -24,6 +24,10 @@ var mocha        = require('gulp-mocha');
 var jshint       = require('gulp-jshint');
 var stylish      = require('jshint-stylish');
 
+// can be removed after project is initially created
+var prompt       = require('gulp-prompt');
+var replace      = require('gulp-replace');
+
 // define main directories
 var inputBase  = './assets/';
 var outputBase = './public/';
@@ -54,7 +58,8 @@ var FILES = {
         js: 'bundle.js',
         css: 'style.css'
     },
-    assets: 'assets.json'
+    assets: 'assets.json',
+    defaultProjectName: 'your-name-here' // replaced with user input on setup
 };
 
 // clean out folders of generated assets
@@ -162,6 +167,31 @@ gulp.task('server', ['watch'], function() {
             'NODE_ENV': 'development'
         }
     });
+});
+
+// can be deleted after project is initially created
+gulp.task('setup', function () {
+    gulp.src('./setup.sh') // never gets touched
+	.pipe(prompt.prompt({
+		type: 'input',
+		name: 'projectName',
+		message: 'What is the name of your project? (eg. dg-foo-bar)'
+	}, function(res) {
+        gulp.src([
+            'project.json',
+            'package.json',
+            'bake-scripts/create-node-opts.js',
+            'infrastructure/src/component.py',
+            'infrastructure/output/component.json',
+            'infrastructure/output/component.json',
+            'scripts/*.js',
+            'scripts/ci',
+            'scripts/deploy.sh',
+            'config/default.json'
+        ]).pipe(replace(FILES.defaultProjectName, res.projectName))
+        .pipe(gulp.dest('.'));
+        console.log('Replaced references to ' + FILES.defaultProjectName + ' - now delete the Gulp setup task!');
+	}));
 });
 
 // dev task: start the server and watch for changes
