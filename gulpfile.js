@@ -88,6 +88,15 @@ gulp.task('js', ['clean:assets', 'clean:js'], function() {
         .pipe(livereload());
 });
 
+// compile requirejs (currently not working, needs require/almond)
+gulp.task('requirejs', ['clean:assets', 'clean:js'], function () {
+    return gulp.src(DIRS.in.js + '/require/' + FILES.in.js)
+    .pipe(amdOptimize("main"))
+    .pipe(concat(FILES.out.js))
+    .pipe(gulp.dest(DIRS.out.js))
+    .pipe(livereload());
+});
+
 // compile Sass (after cleaning and moving images)
 // references to images will be replaced (on --production/LIVE)
 // with cachebusted versions
