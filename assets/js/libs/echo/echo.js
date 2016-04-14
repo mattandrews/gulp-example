@@ -55,8 +55,6 @@ define(['./echo-8.0.0'], function (Echo) {
         }
     };
 
-    console.log('echo lols');
-
     window._ECHOJS = {
         init: initEcho,
         track: trackUserAction
