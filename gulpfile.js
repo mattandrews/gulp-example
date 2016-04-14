@@ -24,6 +24,7 @@ var mocha        = require('gulp-mocha');
 var jshint       = require('gulp-jshint');
 var stylish      = require('jshint-stylish');
 var addSrc       = require('gulp-add-src');
+var babel        = require('gulp-babel');
 
 // can be removed after project is initially created
 var prompt       = require('gulp-prompt');
@@ -87,6 +88,7 @@ gulp.task('js', ['clean:assets', 'clean:js'], function() {
         .pipe(source(FILES.out.js))
         .pipe(buffer())
         .pipe(gulpif(!argv.production, sourcemaps.init({loadMaps: true})))
+        .pipe(babel())
         .pipe(gulpif(argv.production, uglify())) // super slow!
         .on('error', gutil.log)
         .pipe(sourcemaps.write())
