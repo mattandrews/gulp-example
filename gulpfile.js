@@ -21,7 +21,7 @@ var gulpif       = require('gulp-if');
 var amdOptimize  = require('amd-optimize');
 var concat       = require('gulp-concat');
 var mocha        = require('gulp-mocha');
-var jshint       = require('gulp-jshint');
+var jshint       = require('gulp-jshint'); // @TODO replace with eslint
 var stylish      = require('jshint-stylish');
 var addSrc       = require('gulp-add-src');
 var babel        = require('gulp-babel');
@@ -40,13 +40,13 @@ var DIRS = {
         root: inputBase,
         css:  inputBase + 'scss',
         js:   inputBase + 'js',
-        img:  inputBase + 'img',
+        img:  inputBase + 'img'
     },
     out: {
         root: outputBase,
         css:  outputBase + 'css',
         js:   outputBase + 'js',
-        img:  outputBase + 'img',
+        img:  outputBase + 'img'
     }
 };
 
@@ -161,7 +161,7 @@ gulp.task('lint', function() {
     return gulp.src([
         DIRS.in.js + '/**/*.js',
         '!' + DIRS.in.js + '/libs/',
-        '!' + DIRS.in.js + '/libs/**',
+        '!' + DIRS.in.js + '/libs/**'
     ])
     .pipe(jshint({}))
     .pipe(jshint.reporter(stylish));
@@ -187,8 +187,8 @@ gulp.task('server', ['watch'], function() {
 gulp.task('setup', function () {
     gulp.src('./setup.sh') // never gets touched
 	.pipe(prompt.prompt({
-		type: 'input',
-		name: 'projectName',
+        type: 'input',
+        name: 'projectName',
 		message: 'What is the name of your project? (eg. dg-foo-bar)'
 	}, function(res) {
         gulp.src([
